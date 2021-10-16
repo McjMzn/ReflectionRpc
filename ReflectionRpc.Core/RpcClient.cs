@@ -6,27 +6,27 @@ using RestSharp;
 
 namespace ReflectionRpc.Core
 {
-    public class RpcClientBase : IRpcClient
+    public class RpcClient : IRpcClient
     {
         private RestClient restClient;
 
         protected string HostAddress { get; }
         protected Guid HostGuid { get; }
 
-        private RpcClientBase(string hostAddress)
+        private RpcClient(string hostAddress)
         {
             this.HostAddress = hostAddress;
             this.restClient = new RestClient(hostAddress);
         }
 
-        public RpcClientBase(string hostAddress, string tag)
+        public RpcClient(string hostAddress, string tag)
             : this(hostAddress)
         {
             var request = new RestRequest($"rpc/hosts/tagged/{tag}", Method.GET);
             this.HostGuid = this.restClient.Execute<Guid>(request).Data;
         }
 
-        public RpcClientBase(string hostAddress, Guid hostGuid)
+        public RpcClient(string hostAddress, Guid hostGuid)
             : this(hostAddress)
         {
             this.HostGuid = hostGuid;
@@ -76,7 +76,7 @@ namespace ReflectionRpc.Core
                     return ValueWrapper.UnwrapIfPossible(simpleResponse.Value);
 
                 case HostRpcResponse hostResponse:
-                    return new RpcClientBase(this.HostAddress, hostResponse.HostGuid);
+                    return new RpcClient(this.HostAddress, hostResponse.HostGuid);
                 default:
                     throw new NotSupportedException($"Response of type {response.GetType().Name} not supported!");
             }

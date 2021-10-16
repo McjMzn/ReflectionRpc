@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace ReflectionRpc.Examples.Service
 {
-    public interface IConsoleLoggingServiceSettings
+    public interface IConsoleLoggingServiceColorSettings
     {
         ConsoleColor BackgroundColor { get; set; }
         ConsoleColor ForegroundColor { get; set; }
+        void ResetToDefault();
     }
 }

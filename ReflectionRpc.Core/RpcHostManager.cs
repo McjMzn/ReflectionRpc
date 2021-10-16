@@ -8,17 +8,24 @@ using System.Threading.Tasks;
 
 namespace ReflectionRpc.Core
 {
-    public class RpcHostManager
+    public class RpcHostManager : IRpcHostManager
     {
         private List<RegisteredRpcHost> registeredHosts = new List<RegisteredRpcHost>();
         private List<RegisteredRpcHost> topHosts = new List<RegisteredRpcHost>();
 
-        private bool RequiresHost(PropertyInfo propertyInfo)
+        public List<RegisteredRpcHost> GetHosts()
         {
-            return
-                !propertyInfo.PropertyType.IsPrimitive &&
-                !propertyInfo.PropertyType.IsEnum &&
-                 propertyInfo.PropertyType != typeof(string);
+            return this.topHosts;
+        }
+
+        public RegisteredRpcHost GetHost(Guid guid)
+        {
+            return this.registeredHosts.SingleOrDefault(registeredHost => registeredHost.Guid == guid);
+        }
+
+        public RegisteredRpcHost GetHost(string tag)
+        {
+            return this.registeredHosts.SingleOrDefault(registeredHost => registeredHost.Tag == tag);
         }
 
         public RegisteredRpcHost RegisterHost(object rpcTarget, string tag = null)
@@ -27,6 +34,30 @@ namespace ReflectionRpc.Core
             this.topHosts.Add(registeredHost);
 
             return registeredHost;
+        }
+
+        private RegisteredRpcHost RegisterHostInternal(object rpcTarget, string tag = null)
+        {
+            if (this.registeredHosts.Select(rpcHost => rpcHost.RpcHost.Target).Contains(rpcTarget))
+            {
+                throw new Exception("Target already registered.");
+            }
+
+            var host = new RpcHost(rpcTarget);
+            var registeredProperties = this.RegisterRequiredProperties(rpcTarget);
+
+            var registeredHost = new RegisteredRpcHost(host, registeredProperties) { Tag = tag };
+            this.registeredHosts.Add(registeredHost);
+
+            return registeredHost;
+        }
+
+        private bool RequiresHost(PropertyInfo propertyInfo)
+        {
+            return
+                !propertyInfo.PropertyType.IsPrimitive &&
+                !propertyInfo.PropertyType.IsEnum &&
+                 propertyInfo.PropertyType != typeof(string);
         }
 
         private Dictionary<string, RegisteredRpcHost> RegisterRequiredProperties(object rpcTarget)
@@ -43,38 +74,6 @@ namespace ReflectionRpc.Core
             });
 
             return properties;
-        }
-
-
-        public RegisteredRpcHost RegisterHostInternal(object rpcTarget, string tag = null)
-        {
-            if (this.registeredHosts.Select(rpcHost => rpcHost.RpcHost.Target).Contains(rpcTarget))
-            {
-                throw new Exception("Target already registered.");
-            }
-
-            var host = new RpcHost(rpcTarget);
-            var registeredProperties = this.RegisterRequiredProperties(rpcTarget);
-
-            var registeredHost = new RegisteredRpcHost(host, registeredProperties) { Tag = tag };
-            this.registeredHosts.Add(registeredHost);
-
-            return registeredHost;
-        }
-
-        public RegisteredRpcHost GetRegisteredRpcHost(Guid guid)
-        {
-            return this.registeredHosts.Single(registeredHost => registeredHost.Guid == guid);
-        }
-
-        public RegisteredRpcHost GetRegisteredRpcHost(string tag)
-        {
-            return this.registeredHosts.Single(registeredHost => registeredHost.Tag == tag);
-        }
-
-        public List<RegisteredRpcHost> GetRegisteredHosts()
-        {
-            return this.topHosts;
         }
     }
 }

@@ -11,8 +11,9 @@ namespace ReflectionRpc.Examples.Service
     {
         private int messageCounter = 0;
 
-        public string MessagePrefix { get; set; } = string.Empty;
-        public IConsoleLoggingServiceSettings Settings { get; set; } = new ConsoleLoggingServiceSettings();
+        public string MessagePrefix { get; set; } = ">";
+       
+        public IConsoleLoggingServiceColorSettings Settings { get; set; } = new ConsoleLoggingServiceColorSettings();
 
         public int GetNumberOfLoggedMessages()
         {

@@ -12,6 +12,11 @@
 
         public static object WrapIfRequired(object o)
         {
+            if (o is null)
+            {
+                return null;
+            }
+
             if (o.GetType().IsEnum)
             {
                 return new ValueWrapper
@@ -42,10 +47,19 @@
 
         public object Unwrap()
         {
-            return
-                IsEnum ?
-                Enum.Parse(Type.GetType(TypeName), (string)Value) :
-                Value;
+            var type = Type.GetType(this.TypeName);
+
+            if (this.Value.GetType() == type)
+            {
+                return this.Value;
+            }
+
+            if (type.IsEnum)
+            {
+                return Enum.Parse(type, (string)this.Value);
+            }
+
+            return Convert.ChangeType(this.Value, type);
         }
     }
 }

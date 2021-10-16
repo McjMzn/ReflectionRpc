@@ -1,0 +1,59 @@
+﻿@page "/rpc/hosts/list"
+
+@using ReflectionRpc.Core
+@inject IRpcHostManager rpcHostsManager
+
+@{
+	<style>
+		body {
+			background-color: #333333;
+			display: flex;
+			flex-direction: column;
+			align-items: center
+		}
+
+		.title {
+			font-family: Arial;
+			color: white;
+			margin: 0px 0px 15px 0px;
+			font-size: 24px;
+			font-weight: normal;
+		}
+
+		.host {
+			font-family: Consolas;
+			padding: 10px;
+			border-radius: 5px;
+			background-color: #1e1e1e;
+			color: #DCDCDC;
+			width: 600px;
+		}
+
+		.host .tag { color: CE9A7E; }
+
+		.interfaces { color: #B8D38C; }
+	</style>
+	
+	void RenderHost(RegisteredRpcHost rpcHost)
+	{
+		<div class="host">
+			<div>
+				@if(!string.IsNullOrWhiteSpace(rpcHost.Tag))
+				{
+					<span class="tag">"@rpcHost.Tag"</span>
+				}
+				<span>@rpcHost.Guid</span>
+
+			</div>
+			
+			<div class="interfaces">
+				@string.Join(" ", rpcHost.ImplementedInterfaces)
+			</div>
+
+		</div>
+	}
+
+	<h1 class="title">ReflectionRpc - registered top level hosts</h1>
+
+	rpcHostsManager.GetHosts().ForEach(RenderHost);
+}

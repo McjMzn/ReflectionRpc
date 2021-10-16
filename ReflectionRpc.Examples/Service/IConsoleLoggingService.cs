@@ -9,7 +9,7 @@ namespace ReflectionRpc.Examples.Service
     public interface IConsoleLoggingService
     {
         string MessagePrefix { get; set; }
-        IConsoleLoggingServiceSettings Settings { get; set; }
+        IConsoleLoggingServiceColorSettings Settings { get; set; }
 
         int GetNumberOfLoggedMessages();
         void PrintConsoleMessage(string message);

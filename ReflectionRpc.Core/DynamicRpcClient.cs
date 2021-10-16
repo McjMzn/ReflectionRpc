@@ -13,9 +13,9 @@ namespace ReflectionRpc.Examples
 {
     public class DynamicRpcClient : DynamicObject
     {
-        RpcClientBase rpcClient;
+        RpcClient rpcClient;
 
-        public DynamicRpcClient(RpcClientBase rpcClient)
+        private DynamicRpcClient(RpcClient rpcClient)
         {
             this.rpcClient = rpcClient;
         }
@@ -29,7 +29,7 @@ namespace ReflectionRpc.Examples
         public override bool TryGetMember(GetMemberBinder binder, out object? result)
         {
             result = this.rpcClient.GetRemotePropertyValue(binder.Name);
-            if (result is RpcClientBase rpcClientResult)
+            if (result is RpcClient rpcClientResult)
             {
                 result = new DynamicRpcClient(rpcClientResult);
             }
@@ -41,6 +41,22 @@ namespace ReflectionRpc.Examples
         {
             this.rpcClient.SetRemotePropertyValue(binder.Name, value);
             return true;
+        }
+
+        public static T Create<T> (RpcClient rpcClient)
+        {
+            var dynamicClient = new DynamicRpcClient(rpcClient);
+            return Impromptu.ActLike(dynamicClient, typeof(T));
+        }
+
+        public static T Create<T>(string hostAddress, Guid hostGuid)
+        {
+            return Create<T>(new RpcClient(hostAddress, hostGuid));
+        }
+
+        public static T Create<T>(string hostAddress, string tag)
+        {
+            return Create<T>(new RpcClient(hostAddress, tag));
         }
     }
 }

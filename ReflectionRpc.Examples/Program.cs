@@ -1,41 +1,35 @@
 ﻿using ImpromptuInterface;
 using ReflectionRpc.Core;
 using ReflectionRpc.Examples;
-using ReflectionRpc.Examples.Rpc;
 using ReflectionRpc.Examples.Service;
 
 
+IConsoleLoggingService consoleLoggingService = DynamicRpcClient.Create<IConsoleLoggingService>("http://localhost:5087/", "Console");
 
 
+Console.WriteLine($"[Get property value] Current message prefix is: {consoleLoggingService.MessagePrefix}");
 
-var rpcClient = new RpcClientBase("http://localhost:5087/", "Console Service");
-dynamic dynamicClient = new DynamicRpcClient(rpcClient);
-IConsoleLoggingService remoteConsole = Impromptu.ActLike<IConsoleLoggingService>(dynamicClient);
+Console.WriteLine($"[Void method invoke] Writing a message.");
+consoleLoggingService.PrintConsoleMessage("This is a remotely logged message.");
 
-var c = remoteConsole.Settings.ForegroundColor;
-
-Console.ReadKey();
-return;
-IConsoleLoggingService consoleLoggingService = new ConsoleLoggingServiceRpcClient("http://localhost:5087/", "Console Service");
-
+Console.WriteLine($"[Set property value] Changing message prefix to: '>>'");
 consoleLoggingService.MessagePrefix = ">>";
 
-var prefix = consoleLoggingService.MessagePrefix;
+Console.WriteLine($"[Void method invoke] Writing multiple messages.");
+consoleLoggingService.PrintConsoleMessage("This is one of messages logged in a batch.", 3);
 
-var settings = consoleLoggingService.Settings;
+Console.WriteLine($"[Set property value in nested client] Changing a foreground color.");
+consoleLoggingService.Settings.ForegroundColor = ConsoleColor.Cyan;
 
-var color = settings.BackgroundColor;
+Console.WriteLine($"[Void method invoke] Writing a message in color.");
+consoleLoggingService.PrintConsoleMessage("This is a remotely logged message in color.");
 
+Console.WriteLine($"[Int32 method invoke] In total {consoleLoggingService.GetNumberOfLoggedMessages()} have been logged.");
 
-consoleLoggingService.PrintConsoleMessage("dupa", 3);
+Console.WriteLine("[Invoke void method in nested client] Resetting color settings.");
+consoleLoggingService.Settings.ResetToDefault();
 
-
-var numberOfLogged = consoleLoggingService.GetNumberOfLoggedMessages();
-
-consoleLoggingService.MessagePrefix = "INFO>";
-
-settings.ForegroundColor = ConsoleColor.Green;
-
-consoleLoggingService.PrintConsoleMessage($"Number of logged messages: {consoleLoggingService.GetNumberOfLoggedMessages()}");
+Console.WriteLine($"[Void method invoke] Writing last message.");
+consoleLoggingService.PrintConsoleMessage("No exception has been thrown. Everything works fine. Goodbye.");
 
 Console.ReadKey();
