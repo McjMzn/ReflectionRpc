@@ -18,4 +18,23 @@ app.Run();
 ## Client
 ```c#
 IConsoleLoggingService consoleLoggingService = DynamicRpcClient.Create<IConsoleLoggingService>("http://localhost:5087/", "Console");
+// At this point use it as regular local object.
+```
+## Interfaces used in example
+```c#
+public interface IConsoleLoggingService
+{
+    string MessagePrefix { get; set; }
+    IConsoleLoggingServiceColorSettings ColorSettings { get; set; }
+    int GetNumberOfLoggedMessages();
+    void PrintConsoleMessage(string message);
+    void PrintConsoleMessage(string message, int count);
+}
+
+public interface IConsoleLoggingServiceColorSettings
+{
+    ConsoleColor BackgroundColor { get; set; }
+    ConsoleColor ForegroundColor { get; set; }
+    void ResetToDefault();
+}
 ```
