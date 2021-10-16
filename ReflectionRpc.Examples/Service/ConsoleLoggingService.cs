@@ -13,7 +13,7 @@ namespace ReflectionRpc.Examples.Service
 
         public string MessagePrefix { get; set; } = ">";
        
-        public IConsoleLoggingServiceColorSettings Settings { get; set; } = new ConsoleLoggingServiceColorSettings();
+        public IConsoleLoggingServiceColorSettings ColorSettings { get; set; } = new ConsoleLoggingServiceColorSettings();
 
         public int GetNumberOfLoggedMessages()
         {
@@ -22,8 +22,8 @@ namespace ReflectionRpc.Examples.Service
 
         public void PrintConsoleMessage(string message)
         {
-            Console.ForegroundColor = this.Settings.ForegroundColor;
-            Console.BackgroundColor = this.Settings.BackgroundColor;
+            Console.ForegroundColor = this.ColorSettings.ForegroundColor;
+            Console.BackgroundColor = this.ColorSettings.BackgroundColor;
 
             Console.WriteLine($"{MessagePrefix}{message}");
             messageCounter++;
