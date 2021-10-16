@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ReflectionRpc.Examples.Service
 {
+    [Serializable]
     public class ConsoleLoggingService : IConsoleLoggingService
     {
         private int messageCounter = 0;

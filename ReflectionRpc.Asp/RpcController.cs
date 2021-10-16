@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ReflectionRpc.Core;
 using ReflectionRpc.Core.RpcResponses;
+using ReflectionRpc.Core.Serialization;
 
 namespace ReflectionRpc.Asp
 {
@@ -29,7 +30,7 @@ namespace ReflectionRpc.Asp
         {
             var registeredHost = this.hostManager.GetRegisteredRpcHost(guid);
             var host = registeredHost.RpcHost;
-
+            
             IRpcResponse result =
                 registeredHost.Properties.ContainsKey(propertyName) ?
                 new HostRpcResponse(registeredHost.Properties[propertyName].Guid) :

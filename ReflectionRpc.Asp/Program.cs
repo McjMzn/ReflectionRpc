@@ -1,12 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using ReflectionRpc.Asp;
 using ReflectionRpc.Core;
 using ReflectionRpc.Core.RpcResponses;
 using ReflectionRpc.Examples.Service;
-using RestSharp;
-using System.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 

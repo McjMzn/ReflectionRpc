@@ -1,4 +1,14 @@
-﻿namespace ReflectionRpc.Core.RpcResponses
+﻿using ReflectionRpc.Core.Serialization;
+
+namespace ReflectionRpc.Core.RpcResponses
 {
-    public record SimpleRpcResponse(object Value) : IRpcResponse;
+    public record SimpleRpcResponse : IRpcResponse
+    {
+        public object Value { get; }
+
+        public SimpleRpcResponse(object value)
+        {
+            this.Value = ValueWrapper.WrapIfRequired(value);
+        }
+    }
 }

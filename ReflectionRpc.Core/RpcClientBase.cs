@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using ReflectionRpc.Core.RpcResponses;
+using ReflectionRpc.Core.Serialization;
 using RestSharp;
 
 namespace ReflectionRpc.Core
@@ -41,39 +42,18 @@ namespace ReflectionRpc.Core
             }
 
             var response = this.restClient.Execute<string>(request);
-            var rpcResult = RpcJsonSerializer.DeserializeRpcResult(response.Data);
+            var rpcResponse = RpcJsonSerializer.DeserializeRpcResult(response.Data);
 
-            if (rpcResult is VoidRpcResponse voidResult)
-            {
-                return null;
-            }
-
-            if (rpcResult is SimpleRpcResponse simpleResult)
-            {
-                return simpleResult.Value;
-            }
-
-            return (rpcResult as HostRpcResponse).HostGuid;
+            return this.ExtractObjectFromResponse(rpcResponse);
         }
 
         public object GetRemotePropertyValue(string propertyName)
         {
             var request = new RestRequest($"rpc/hosts/{HostGuid}/properties/{propertyName}", Method.GET);
             var response = restClient.Execute<string>(request);
-            var rpcResult = RpcJsonSerializer.DeserializeRpcResult(response.Data);
+            var rpcResponse = RpcJsonSerializer.DeserializeRpcResult(response.Data);
 
-
-            if (rpcResult is VoidRpcResponse voidResult)
-            {
-                return null;
-            }
-
-            if (rpcResult is SimpleRpcResponse simpleResult)
-            {
-                return simpleResult.Value;
-            }
-
-            return (rpcResult as HostRpcResponse).HostGuid;
+            return this.ExtractObjectFromResponse(rpcResponse);
         }
 
         public void SetRemotePropertyValue(string propertyName, object value)
@@ -83,6 +63,23 @@ namespace ReflectionRpc.Core
             request.AddJsonBody(payload);
 
             this.restClient.Execute(request);
+        }
+
+        private object ExtractObjectFromResponse(IRpcResponse response)
+        {
+            switch (response)
+            {
+                case VoidRpcResponse:
+                    return null;
+
+                case SimpleRpcResponse simpleResponse:
+                    return ValueWrapper.UnwrapIfPossible(simpleResponse.Value);
+
+                case HostRpcResponse hostResponse:
+                    return new RpcClientBase(this.HostAddress, hostResponse.HostGuid);
+                default:
+                    throw new NotSupportedException($"Response of type {response.GetType().Name} not supported!");
+            }
         }
     }
 }
