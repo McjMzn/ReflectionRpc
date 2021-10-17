@@ -14,7 +14,7 @@ app.HostReflectionRpcService(new ConsoleLoggingService(), "Console");
 [...]
 app.Run();
 ```
-![image](https://i.imgur.com/8CICOOv.png)
+![image](https://i.imgur.com/BWEq1hZ.png)
 ## Client
 ```c#
 IConsoleLoggingService consoleLoggingService = DynamicRpcClient.Create<IConsoleLoggingService>("http://localhost:5087/", "Console");
