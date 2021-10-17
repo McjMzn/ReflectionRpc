@@ -1,7 +1,11 @@
 # ReflectionRpc
-A simple HTTP based RPC relying on reflection. Project started out of curiosity if that can even be achieved. Got to admit, that it kinda works :D
+Project started out of curiosity if it would be possible to use reflection for operating on remote objects just as they were local ones in such way that no additional wrappers or contract definitions would be required to use it.
+
+I consider this proof of concept to be really successful (but also requiring some polish). 
 
 ## Server
+![image](https://i.imgur.com/zrTLjd4.png)
+### Extend existing web application
 ```c#
 var builder = WebApplication.CreateBuilder(args);
 [...]
@@ -14,7 +18,12 @@ app.HostReflectionRpcService(new ConsoleLoggingService(), "Console");
 [...]
 app.Run();
 ```
-![image](https://i.imgur.com/BWEq1hZ.png)
+### Use `ReflectionRpcWebServer` class
+```c#
+var server = new ReflectionRpcWebServer();
+server.AddHostedService(new ConsoleLoggingService(), "Console");
+server.Run("http://localhost:12345");
+```
 ## Client
 ```c#
 IConsoleLoggingService consoleLoggingService = DynamicRpcClient.Create<IConsoleLoggingService>("http://localhost:5087/", "Console");
