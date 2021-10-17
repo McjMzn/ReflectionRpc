@@ -5,7 +5,7 @@ I consider this proof of concept to be really successful (but also requiring som
 
 ## Server
 ![image](https://i.imgur.com/zrTLjd4.png)
-### Extend existing web application
+### Extending existing web application
 ```c#
 var builder = WebApplication.CreateBuilder(args);
 [...]
@@ -18,7 +18,7 @@ app.HostReflectionRpcService(new ConsoleLoggingService(), "Console");
 [...]
 app.Run();
 ```
-### Use `ReflectionRpcWebServer` class
+### Using `ReflectionRpcWebServer` class
 ```c#
 var server = new ReflectionRpcWebServer();
 server.AddHostedService(new ConsoleLoggingService(), "Console");
