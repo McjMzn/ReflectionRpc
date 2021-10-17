@@ -1,4 +1,4 @@
-﻿@page "/rpc/hosts/list"
+﻿@page "/rpc/ui/hosts"
 
 @using ReflectionRpc.Core
 @inject IRpcHostManager rpcHostsManager
@@ -32,6 +32,23 @@
 		.host .tag { color: CE9A7E; }
 
 		.interfaces { color: #B8D38C; }
+
+		.api {
+			display: block;
+			height: 35px;
+			width: 35px;
+			text-decoration: none;
+			color: white;
+			background-color: #89BF04;
+			font-family: Arial;
+			font-weight: bold;
+			border-radius: 20px;
+			text-align: center;
+			font-size: 14px;
+			line-height: 35px;
+			position: fixed;
+			right: 10px;
+		}
 	</style>
 	
 	void RenderHost(RegisteredRpcHost rpcHost)
@@ -53,7 +70,8 @@
 		</div>
 	}
 
-	<h1 class="title">ReflectionRpc - registered top level hosts</h1>
+	<h1 class="title">ReflectionRpc - Hosts</h1>
+	<a class="api" href="/swagger/index.html">API</a>
 
 	rpcHostsManager.GetHosts().ForEach(RenderHost);
 }
