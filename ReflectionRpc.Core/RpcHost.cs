@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
+using ReflectionRpc.Core.Communication;
+using ReflectionRpc.Core.Communication.RpcResponses;
+using ReflectionRpc.Core.Interfaces;
 
 namespace ReflectionRpc.Core
 {
@@ -14,44 +12,48 @@ namespace ReflectionRpc.Core
             this.Target = target;
         }
         
-        public object Target { get; }
+        public object Target { get; set; }
         public Type TargetType => this.Target.GetType();
-
 
         public object ExecuteMethod(string methodName, params object[] arguments)
         {
-            var methods = this.TargetType
-                .GetMethods()
-                .Where(m => m.Name == methodName)
-                .Where(m => ArgumentsMatchParameterInfos(m.GetParameters(), arguments))
-                .ToList();
+            var methods = this.TargetType.GetMethods().Where(m => m.Name == methodName);
+            var method = (MethodInfo)Type.DefaultBinder.SelectMethod(BindingFlags.Public | BindingFlags.Instance, methods.ToArray(), arguments.Select(a => a.GetType()).ToArray(), null);
 
-            if (methods.Count == 0)
+            if (method == null)
             {
-                throw new NotSupportedException("No matching method has been found.");
+                method = methods.First(m => this.TryToConvertArguments(m.GetParameters(), arguments));
             }
 
-            var method = methods.Single();
             return method.Invoke(this.Target, arguments);
+
+            //var methods = this.TargetType
+            //    .GetMethods()
+            //    .Where(m => m.Name == methodName)
+            //    .Where(m => ArgumentsMatchParameterInfos(m.GetParameters(), arguments))
+            //    .ToList();
+
+            //if (methods.Count == 0)
+            //{
+            //    throw new NotSupportedException("No matching method has been found.");
+            //}
+
+            //var method = methods.Single();
+            //return method.Invoke(this.Target, arguments);
         }
 
         public void SetPropertyValue(string propertyName, object value)
         {
             var property = this.TargetType.GetProperty(propertyName);
-            if (property.PropertyType.IsEnum && value is string)
-            {
-                value = Enum.Parse(property.PropertyType, value as string);
-            }
-
-            property.SetValue(Target, value);
+            property.SetValue(this.Target, value);
         }
 
         public object GetPropertyValue(string propertyName)
         {
-            return this.TargetType.GetProperty(propertyName).GetValue(Target);
+            return this.TargetType.GetProperty(propertyName).GetValue(this.Target);
         }
 
-        private bool ArgumentsMatchParameterInfos(ParameterInfo[] parameters, object[] arguments)
+        private bool TryToConvertArguments(ParameterInfo[] parameters, object[] arguments)
         {
             if (parameters.Length != arguments.Length)
             {

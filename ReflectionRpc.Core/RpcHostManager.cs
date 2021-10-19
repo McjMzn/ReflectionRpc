@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Reflection;
+using ReflectionRpc.Core.Communication;
+using ReflectionRpc.Core.Communication.RpcRequests;
+using ReflectionRpc.Core.Communication.RpcResponses;
+using ReflectionRpc.Core.Interfaces;
 
 namespace ReflectionRpc.Core
 {
@@ -36,6 +34,78 @@ namespace ReflectionRpc.Core
             return registeredHost;
         }
 
+        public IRpcResponse ExecuteRequest(Guid hostGuid, IRpcRequest request)
+        {
+            var host = this.GetHost(hostGuid);
+
+            return request switch
+            {
+                ExecuteMethodRequest executeMethodRequest => this.HandleExecuteMethodRequest(host, executeMethodRequest),
+                GetPropertyValueRequest getPropertyValueRequest => this.HandleGetPropertyValueRequest(host, getPropertyValueRequest),
+                SetPropertyValueRequest setPropertyValueRequest => this.HandleSetPropertyValueRequest(host, setPropertyValueRequest),
+                _ => throw new NotSupportedException($"RPC request of type {request.GetType().Name} is not supported.")
+            };
+        }
+
+        private IRpcResponse HandleSetPropertyValueRequest(RegisteredRpcHost host, SetPropertyValueRequest request)
+        {
+            try
+            {
+                var propertyName = request.PropertyName;
+                var property = host.RpcHost.Target.GetType().GetProperty(propertyName);
+
+                if (!property.PropertyType.RequiresRpcHost())
+                {
+                    host.RpcHost.SetPropertyValue(request.PropertyName, request.Value);
+                    return new VoidRpcResponse();
+                }
+
+                var registered = this.RegisterHost(request.Value);
+                host.Properties[propertyName] = registered;
+                return new HostRpcResponse(registered.Guid);
+            }
+            catch (Exception e)
+            {
+                return new ExceptionRpcResponse(e);
+            }
+        }
+
+        private IRpcResponse HandleGetPropertyValueRequest(RegisteredRpcHost host, GetPropertyValueRequest request)
+        {
+            try
+            {
+                var propertyName = request.PropertyName;
+                var propertyValue = host.RpcHost.GetPropertyValue(propertyName);
+
+                if (!host.Properties.ContainsKey(propertyName))
+                {
+                    return new ValueRpcResponse(propertyValue);
+                }
+
+                // TODO: The actual object in property may have been changed during registration time.
+                return new HostRpcResponse(host.Properties[propertyName].Guid);
+            }
+            catch (Exception e)
+            {
+                return new ExceptionRpcResponse(e);
+            }
+        }
+
+        private IRpcResponse HandleExecuteMethodRequest(RegisteredRpcHost host, ExecuteMethodRequest request)
+        {
+            try
+            {
+                var returned = host.RpcHost.ExecuteMethod(request.MethodName, request.Arguments);
+                
+                // TODO: Obviously, this needs to be changed to support complex types.
+                return new ValueRpcResponse(returned);
+            }
+            catch (Exception e)
+            {
+                return new ExceptionRpcResponse(e);
+            }
+        }
+
         private RegisteredRpcHost RegisterHostInternal(object rpcTarget, string tag = null)
         {
             if (this.registeredHosts.Select(rpcHost => rpcHost.RpcHost.Target).Contains(rpcTarget))
@@ -52,20 +122,12 @@ namespace ReflectionRpc.Core
             return registeredHost;
         }
 
-        private bool RequiresHost(PropertyInfo propertyInfo)
-        {
-            return
-                !propertyInfo.PropertyType.IsPrimitive &&
-                !propertyInfo.PropertyType.IsEnum &&
-                 propertyInfo.PropertyType != typeof(string);
-        }
-
         private Dictionary<string, RegisteredRpcHost> RegisterRequiredProperties(object rpcTarget)
         {
             var properties = new Dictionary<string, RegisteredRpcHost>();
             rpcTarget.GetType().GetProperties().ToList().ForEach(property =>
             {
-                if (this.RequiresHost(property))
+                if (property.PropertyType.RequiresRpcHost())
                 {
                     var value = property.GetValue(rpcTarget);
                     var propertyHostInformation = this.RegisterHostInternal(value);

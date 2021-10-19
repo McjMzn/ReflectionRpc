@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ReflectionRpc.Core\ReflectionRpc.Core.csproj" />
-    <ProjectReference Include="..\ReflectionRpc.Examples\ReflectionRpc.Examples.csproj" />
   </ItemGroup>
 
 </Project>

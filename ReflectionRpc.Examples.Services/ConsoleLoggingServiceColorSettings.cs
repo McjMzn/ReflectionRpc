@@ -1,21 +1,21 @@
-﻿namespace ReflectionRpc.Examples.Service
+﻿namespace ReflectionRpc.Examples.Services
 {
     public class ConsoleLoggingServiceColorSettings : IConsoleLoggingServiceColorSettings
     {
         public ConsoleLoggingServiceColorSettings()
         {
-            this.BackgroundColor = Console.BackgroundColor;
-            this.ForegroundColor = Console.ForegroundColor;
+            BackgroundColor = Console.BackgroundColor;
+            ForegroundColor = Console.ForegroundColor;
         }
 
         public ConsoleColor BackgroundColor { get; set; }
-        
+
         public ConsoleColor ForegroundColor { get; set; }
-        
+
         public void ResetToDefault()
         {
-            this.BackgroundColor = ConsoleColor.Black;
-            this.ForegroundColor = ConsoleColor.Gray;
+            BackgroundColor = ConsoleColor.Black;
+            ForegroundColor = ConsoleColor.Gray;
         }
     }
 }

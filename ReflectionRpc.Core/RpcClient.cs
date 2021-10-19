@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using ReflectionRpc.Core.RpcResponses;
-using ReflectionRpc.Core.Serialization;
+﻿using ReflectionRpc.Core.Communication;
+using ReflectionRpc.Core.Communication.RpcResponses;
+using ReflectionRpc.Core.Communication.Serialization;
+using ReflectionRpc.Core.Interfaces;
 using RestSharp;
 
 namespace ReflectionRpc.Core
@@ -34,52 +34,45 @@ namespace ReflectionRpc.Core
 
         public object ExecuteRemoteMethod(string methodName, params object[] arguments)
         {
-            var request = new RestRequest($"rpc/hosts/{HostGuid}/methods/{methodName}", Method.POST);
-            if (arguments.Length > 0)
-            {
-                var payload = RpcJsonSerializer.Serialize(arguments);
-                request.AddJsonBody(payload);
-            }
-
-            var response = this.restClient.Execute<string>(request);
-            var rpcResponse = RpcJsonSerializer.DeserializeRpcResult(response.Data);
-
-            return this.ExtractObjectFromResponse(rpcResponse);
+            return this.SendServerRequest($"rpc/hosts/{HostGuid}/methods/{methodName}", Method.POST, true, arguments);
         }
 
         public object GetRemotePropertyValue(string propertyName)
         {
-            var request = new RestRequest($"rpc/hosts/{HostGuid}/properties/{propertyName}", Method.GET);
-            var response = restClient.Execute<string>(request);
-            var rpcResponse = RpcJsonSerializer.DeserializeRpcResult(response.Data);
-
-            return this.ExtractObjectFromResponse(rpcResponse);
+            return this.SendServerRequest($"rpc/hosts/{HostGuid}/properties/{propertyName}", Method.GET);
         }
 
         public void SetRemotePropertyValue(string propertyName, object value)
         {
-            var payload = RpcJsonSerializer.Serialize(value);
-            var request = new RestRequest($"rpc/hosts/{this.HostGuid}/properties/{propertyName}", Method.POST);
-            request.AddJsonBody(payload);
-
-            this.restClient.Execute(request);
+            this.SendServerRequest($"rpc/hosts/{this.HostGuid}/properties/{propertyName}", Method.POST, true, value);
         }
 
-        private object ExtractObjectFromResponse(IRpcResponse response)
+        private object SendServerRequest(string url, Method method, bool containsPaylod = false, object payload = null)
         {
-            switch (response)
+            var request = new RestRequest(url, method);
+            if (containsPaylod)
             {
-                case VoidRpcResponse:
-                    return null;
-
-                case SimpleRpcResponse simpleResponse:
-                    return ValueWrapper.UnwrapIfPossible(simpleResponse.Value);
-
-                case HostRpcResponse hostResponse:
-                    return new RpcClient(this.HostAddress, hostResponse.HostGuid);
-                default:
-                    throw new NotSupportedException($"Response of type {response.GetType().Name} not supported!");
+                var serializedPayload = RpcJsonSerializer.Serialize(payload);
+                request.AddJsonBody(serializedPayload);
             }
+
+            var serverResponse = this.restClient.Execute<string>(request);
+            
+            return this.HandleServerResponse(serverResponse);
+        }
+
+        private object HandleServerResponse(IRestResponse<string> serverResponse)
+        {
+            var serializedResponse = serverResponse.Data;
+            var rpcResponse = RpcJsonSerializer.DeserializeRpcResponse(serializedResponse);
+            return rpcResponse switch
+            {
+                VoidRpcResponse voidResponse => null,
+                ValueRpcResponse valueResponse => ValueWrapper.UnwrapIfPossible(valueResponse.Value),
+                HostRpcResponse hostResponse => new RpcClient(this.HostAddress, hostResponse.HostGuid),
+                ExceptionRpcResponse exceptionResponse => throw new Exception($"{exceptionResponse.ExceptionTypeName}{Environment.NewLine}{exceptionResponse.ExceptionMessage}{Environment.NewLine}{exceptionResponse.StackTrace}."),
+                _ => rpcResponse//new NotSupportedException($"Response of type {rpcResponse.GetType().Name} is not supported!")
+            };
         }
     }
 }

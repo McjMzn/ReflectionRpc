@@ -1,4 +1,4 @@
-﻿namespace ReflectionRpc.Core.Serialization
+﻿namespace ReflectionRpc.Core.Communication.Serialization
 {
     public class ValueWrapper
     {
@@ -47,19 +47,19 @@
 
         public object Unwrap()
         {
-            var type = Type.GetType(this.TypeName);
+            var type = Type.GetType(TypeName);
 
-            if (this.Value.GetType() == type)
+            if (Value.GetType() == type)
             {
-                return this.Value;
+                return Value;
             }
 
             if (type.IsEnum)
             {
-                return Enum.Parse(type, (string)this.Value);
+                return Enum.Parse(type, (string)Value);
             }
 
-            return Convert.ChangeType(this.Value, type);
+            return Convert.ChangeType(Value, type);
         }
     }
 }

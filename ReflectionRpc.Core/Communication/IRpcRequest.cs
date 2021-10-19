@@ -1,4 +1,4 @@
-﻿namespace ReflectionRpc.Core.RpcRequests
+﻿namespace ReflectionRpc.Core.Communication
 {
     public interface IRpcRequest
     {

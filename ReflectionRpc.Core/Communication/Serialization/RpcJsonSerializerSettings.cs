@@ -1,13 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using ReflectionRpc.Core.RpcResponses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ReflectionRpc.Core.Serialization
+namespace ReflectionRpc.Core.Communication.Serialization
 {
 
     public class RpcJsonSerializer
@@ -21,10 +15,10 @@ namespace ReflectionRpc.Core.Serialization
 
         public static string Serialize(object o)
         {
-            return JsonConvert.SerializeObject(ValueWrapper.WrapIfRequired(o), SerializerSettings);
+            return o is null ? null : JsonConvert.SerializeObject(ValueWrapper.WrapIfRequired(o), SerializerSettings);
         }
 
-        public static IRpcResponse DeserializeRpcResult(string json)
+        public static IRpcResponse DeserializeRpcResponse(string json)
         {
             return (IRpcResponse)DeserializeObject(json);
         }

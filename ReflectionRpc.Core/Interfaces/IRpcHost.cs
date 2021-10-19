@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ReflectionRpc.Core.Communication;
+using System.Reflection;
 
-namespace ReflectionRpc.Core
+namespace ReflectionRpc.Core.Interfaces
 {
     public interface IRpcHost
     {
-        object Target { get; }
-        Type TargetType { get; }
+        object Target { get; set; }
 
         void SetPropertyValue(string propertyName, object value);
         object GetPropertyValue(string propertyName);

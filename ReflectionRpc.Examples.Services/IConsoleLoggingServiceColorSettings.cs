@@ -1,4 +1,4 @@
-﻿namespace ReflectionRpc.Examples.Service
+﻿namespace ReflectionRpc.Examples.Services
 {
     public interface IConsoleLoggingServiceColorSettings
     {

@@ -1,10 +1,10 @@
-﻿namespace ReflectionRpc.Asp
+﻿namespace ReflectionRpc.WebServer
 {
     public class ReflectionRpcWebServer
     {
         private WebApplication app;
 
-        public ReflectionRpcWebServer()
+        public ReflectionRpcWebServer(Action<WebApplicationBuilder> applicationBuilderAction = null, Action<WebApplication> applicationAction = null)
         {
             var builder = WebApplication.CreateBuilder(Environment.GetCommandLineArgs());
 
@@ -14,8 +14,10 @@
             builder.Services.AddRazorPages();
 
             builder.Services.AddReflectionRpc();
-            
-            this.app = builder.Build();
+
+            applicationBuilderAction?.Invoke(builder);
+
+            app = builder.Build();
 
             app.UseSwagger();
             app.UseSwaggerUI();
@@ -24,16 +26,18 @@
             app.UseReflectionRpc();
 
             app.MapRazorPages();
+
+            applicationAction?.Invoke(app);
         }
 
         public void AddHostedService(object service, string tag)
         {
-            this.app.HostReflectionRpcService(service, tag);
+            app.HostReflectionRpcService(service, tag);
         }
 
         public void Run(string url = null)
         {
-            this.app.Run(url);
+            app.Run(url);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ReflectionRpc.Core.RpcResponses
+﻿namespace ReflectionRpc.Core.Communication.RpcResponses
 {
     public record HostRpcResponse(Guid HostGuid) : IRpcResponse;
 }

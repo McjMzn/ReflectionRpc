@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ReflectionRpc.Core;
-using ReflectionRpc.Core.RpcResponses;
-using ReflectionRpc.Core.Serialization;
-using ReflectionRpc.Examples.Service;
+using ReflectionRpc.Core.Communication;
+using ReflectionRpc.Core.Communication.RpcRequests;
+using ReflectionRpc.Core.Communication.RpcResponses;
+using ReflectionRpc.Core.Communication.Serialization;
+using ReflectionRpc.Core.Interfaces;
 
-namespace ReflectionRpc.Asp
+namespace ReflectionRpc.WebServer
 {
     public static class RefectionRpcAspExtensions
     {
@@ -22,16 +24,16 @@ namespace ReflectionRpc.Asp
 
         public static IApplicationBuilder UseReflectionRpc(this IApplicationBuilder appBuilder)
         {
-            var routeRoot = "rpc";
+            var routeBase = "rpc";
 
-            appBuilder.UseRouting().UseEndpoints(c =>
+            appBuilder.UseRouting().UseEndpoints((Action<IEndpointRouteBuilder>)(c =>
             {
-                c.MapGet($"/{routeRoot}/hosts", GetHosts).Produces<List<RegisteredRpcHost>>();
-                c.MapGet($"/{routeRoot}/hosts/tagged/{{tag}}", GetHostByTag).Produces<Guid>();
-                c.MapGet($"/{routeRoot}/hosts/{{guid}}/properties/{{propertyName}}", GetPropertyValue).Produces<IRpcResponse>();
-                c.MapPost($"/{routeRoot}/hosts/{{guid}}/properties/{{propertyName}}", SetPropertyValue);
-                c.MapPost($"/{routeRoot}/hosts/{{guid}}/methods/{{methodName}}", InvokeMethod);
-            });
+                c.MapGet($"/{routeBase}/hosts", GetHosts).Produces<List<RegisteredRpcHost>>();
+                c.MapGet($"/{routeBase}/hosts/tagged/{{tag}}", GetHostByTag).Produces<Guid>();
+                c.MapGet($"/{routeBase}/hosts/{{guid}}/properties/{{propertyName}}", GetPropertyValue).Produces<IRpcResponse>();
+                c.MapPost($"/{routeBase}/hosts/{{guid}}/properties/{{propertyName}}", SetPropertyValue);
+                c.MapPost($"/{routeBase}/hosts/{{guid}}/methods/{{methodName}}", ExecuteMethod);
+            }));
 
             return appBuilder;
         }
@@ -50,42 +52,30 @@ namespace ReflectionRpc.Asp
 
         private static IResult GetPropertyValue([FromServices] IRpcHostManager hostManager, Guid guid, string propertyName)
         {
-            var registeredHost = hostManager.GetHost(guid);
-            var host = registeredHost.RpcHost;
-            
-            IRpcResponse result =
-                registeredHost.Properties.ContainsKey(propertyName) ?
-                new HostRpcResponse(registeredHost.Properties[propertyName].Guid) :
-                new SimpleRpcResponse(host.GetPropertyValue(propertyName));
+            var result = hostManager.ExecuteRequest(guid, new GetPropertyValueRequest(propertyName));
 
-            var serialized = RpcJsonSerializer.Serialize(result);
-
-            return Results.Ok(serialized);
+            return Results.Ok(RpcJsonSerializer.Serialize(result));
         }
 
         private static async Task<IResult> SetPropertyValue([FromServices] IRpcHostManager hostManager, Guid guid, string propertyName, HttpContext context)
         {
             var serializedValue = await ReadRawBody(context);
-            var registeredHost = hostManager.GetHost(guid);
-            var value = RpcJsonSerializer.DeserializeObject(serializedValue);
+            var request = new SetPropertyValueRequest(propertyName, RpcJsonSerializer.DeserializeObject(serializedValue));
 
-            registeredHost.RpcHost.SetPropertyValue(propertyName, value);
-
-            return Results.Ok();
+            var result = hostManager.ExecuteRequest(guid, request);
+            return Results.Ok(RpcJsonSerializer.Serialize(result));
         }
 
-        private static async Task<IResult> InvokeMethod([FromServices] IRpcHostManager hostManager, Guid guid, string methodName, HttpContext context)
+        private static async Task<IResult> ExecuteMethod([FromServices] IRpcHostManager hostManager, Guid guid, string methodName, HttpContext context)
         {
-            var registeredHost = hostManager.GetHost(guid);
             var serializedArguments = await ReadRawBody(context);
-
             var arguments =
                 string.IsNullOrWhiteSpace(serializedArguments) ?
                 new object[] { } :
                 RpcJsonSerializer.DeserializeObject(serializedArguments) as object[];
 
-            var returnedByMethod = registeredHost.RpcHost.ExecuteMethod(methodName, arguments);
-            var result = new SimpleRpcResponse(returnedByMethod);
+            var result = hostManager.ExecuteRequest(guid, new ExecuteMethodRequest(methodName, arguments));
+
             return Results.Ok(RpcJsonSerializer.Serialize(result));
         }
 

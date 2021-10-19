@@ -1,12 +1,11 @@
-﻿namespace ReflectionRpc.Examples.Service
+﻿namespace ReflectionRpc.Examples.Services
 {
-    [Serializable]
     public class ConsoleLoggingService : IConsoleLoggingService
     {
         private int messageCounter = 0;
 
         public string MessagePrefix { get; set; } = ">";
-       
+
         public IConsoleLoggingServiceColorSettings ColorSettings { get; set; } = new ConsoleLoggingServiceColorSettings();
 
         public int GetNumberOfLoggedMessages()
@@ -14,10 +13,10 @@
             return messageCounter;
         }
 
-        public void PrintConsoleMessage(string message)
+        public void LogMessageToConsole(string message)
         {
-            Console.ForegroundColor = this.ColorSettings.ForegroundColor;
-            Console.BackgroundColor = this.ColorSettings.BackgroundColor;
+            Console.ForegroundColor = ColorSettings.ForegroundColor;
+            Console.BackgroundColor = ColorSettings.BackgroundColor;
 
             Console.WriteLine($"{MessagePrefix}{message}");
             messageCounter++;
@@ -25,11 +24,11 @@
             Console.ResetColor();
         }
 
-        public void PrintConsoleMessage(string message, int count)
+        public void LogMessageToConsole(string message, int count)
         {
             for (var i = 0; i < count; i++)
             {
-                PrintConsoleMessage(message);
+                LogMessageToConsole(message);
             }
         }
     }
