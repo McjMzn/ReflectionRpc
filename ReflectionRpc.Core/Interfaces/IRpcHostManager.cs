@@ -4,7 +4,7 @@ namespace ReflectionRpc.Core.Interfaces
 {
     public interface IRpcHostManager
     {
-        RegisteredRpcHost RegisterHost(object rpcTarget, string tag = null);
+        RegisteredRpcHost RegisterAsRpcHost(object rpcTarget, string tag = null);
 
         List<RegisteredRpcHost> GetHosts();
 

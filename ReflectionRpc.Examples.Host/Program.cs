@@ -3,6 +3,6 @@ using ReflectionRpc.WebServer;
 
 var rpcServer = new ReflectionRpcWebServer();
 
-rpcServer.AddHostedService(new ConsoleLoggingService(), "Console");
+rpcServer.RegisterAsRpcHost(new ConsoleLoggingService(), "Console");
 
 rpcServer.Run("http://localhost:12345");

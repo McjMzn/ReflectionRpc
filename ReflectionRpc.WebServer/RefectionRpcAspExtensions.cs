@@ -16,9 +16,9 @@ namespace ReflectionRpc.WebServer
             return serviceCollection;
         }
 
-        public static IApplicationBuilder HostReflectionRpcService(this IApplicationBuilder appBuilder, object service, string serviceTag = null)
+        public static IApplicationBuilder RegisterAsRpcHost(this IApplicationBuilder appBuilder, object service, string serviceTag = null)
         {
-            appBuilder.ApplicationServices.GetService<IRpcHostManager>().RegisterHost(service, serviceTag);
+            appBuilder.ApplicationServices.GetService<IRpcHostManager>().RegisterAsRpcHost(service, serviceTag);
             return appBuilder;
         }
 

@@ -30,9 +30,9 @@
             applicationAction?.Invoke(app);
         }
 
-        public void AddHostedService(object service, string tag)
+        public void RegisterAsRpcHost(object service, string tag)
         {
-            app.HostReflectionRpcService(service, tag);
+            app.RegisterAsRpcHost(service, tag);
         }
 
         public void Run(string url = null)

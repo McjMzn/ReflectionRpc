@@ -26,7 +26,7 @@ namespace ReflectionRpc.Core
             return this.registeredHosts.SingleOrDefault(registeredHost => registeredHost.Tag == tag);
         }
 
-        public RegisteredRpcHost RegisterHost(object rpcTarget, string tag = null)
+        public RegisteredRpcHost RegisterAsRpcHost(object rpcTarget, string tag = null)
         {
             var registeredHost = this.RegisterHostInternal(rpcTarget, tag);
             this.topHosts.Add(registeredHost);
@@ -60,7 +60,7 @@ namespace ReflectionRpc.Core
                     return new VoidRpcResponse();
                 }
 
-                var registered = this.RegisterHost(request.Value);
+                var registered = this.RegisterAsRpcHost(request.Value);
                 host.Properties[propertyName] = registered;
                 return new HostRpcResponse(registered.Guid);
             }
