@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31717.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReflectionRpc.Core", "ReflectionRpc.Core\ReflectionRpc.Core.csproj", "{52757ED0-97CC-42AD-B698-E16C2D96EE0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReflectionRpc.WebServer", "ReflectionRpc.Asp\ReflectionRpc.WebServer.csproj", "{6ECE0CDE-F992-4D12-9B36-755422B79C44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReflectionRpc.WebServer", "ReflectionRpc.WebServer\ReflectionRpc.WebServer.csproj", "{6ECE0CDE-F992-4D12-9B36-755422B79C44}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{9A504ABD-A01A-45A2-8AA8-13D4060686E0}"
 EndProject
