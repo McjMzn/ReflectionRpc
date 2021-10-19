@@ -26,7 +26,7 @@ server.Run("http://localhost:12345");
 ```
 ## Client
 ```c#
-IConsoleLoggingService consoleLoggingService = DynamicRpcClient.Create<IConsoleLoggingService>("http://localhost:5087/", "Console");
+IConsoleLoggingService consoleLoggingService = RpcProxy.Create<IConsoleLoggingService>("http://localhost:12345/", "Console");
 // At this point use it as regular local object.
 ```
 ## Interfaces used in example
