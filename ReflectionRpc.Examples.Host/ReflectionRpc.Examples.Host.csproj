@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ReflectionRpc.Asp\ReflectionRpc.WebServer.csproj" />
     <ProjectReference Include="..\ReflectionRpc.Examples.Services\ReflectionRpc.Examples.Services.csproj" />
+    <ProjectReference Include="..\ReflectionRpc.WebServer\ReflectionRpc.WebServer.csproj" />
   </ItemGroup>
 
 </Project>
